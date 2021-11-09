@@ -9,8 +9,10 @@ import java.util.List;
 public class MinesweeperGame extends Game {
     private static final int SIDE = 9;
     private static final String MINE = "\uD83D\uDCA3";
+    private static final String FLAG = "\uD83D\uDEA9";
     private final GameObject[][] gameField = new GameObject[SIDE][SIDE];
     private int countMinesOnField;
+    private int countFlags;
 
     @Override
     public void initialize() {
@@ -19,11 +21,14 @@ public class MinesweeperGame extends Game {
     }
 
     private void createGame() {
+        countMinesOnField = 0;
+        countFlags = 0;
         for (int y = 0; y < SIDE; y++) {
             for (int x = 0; x < SIDE; x++) {
                 boolean isMine = getRandomNumber(10) < 1;
                 if (isMine) {
                     countMinesOnField++;
+                    countFlags++;
                 }
                 gameField[y][x] = new GameObject(x, y, isMine);
                 setCellColor(x, y, Color.ORANGE);
