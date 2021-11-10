@@ -9,11 +9,10 @@ import java.util.List;
 public class MinesweeperGame extends Game {
     private static final int SIDE = 9;
     private static final String MINE = "\uD83D\uDCA3";
+    private static final String FLAG = "\uD83D\uDEA9";
+    private final GameObject[][] gameField = new GameObject[SIDE][SIDE];
     private int countMinesOnField;
     private int countFlags;
-    private static final String FLAG = "\uD83D\uDEA9";
-    private GameObject[][] gameField = new GameObject[SIDE][SIDE];
-
 
     @Override
     public void initialize() {
@@ -93,6 +92,28 @@ public class MinesweeperGame extends Game {
                 }
             }
         }
+    }
+
+    private void markTile(int x, int y) {
+        GameObject gameObject = gameField[y][x];
+        if (!gameObject.isOpen) {
+            if (gameObject.isFlag) {
+                gameObject.isFlag = false;
+                countFlags++;
+                setCellValue(x, y, "");
+                setCellColor(x, y, Color.ORANGE);
+            } else if (countFlags != 0) {
+                gameObject.isFlag = true;
+                countFlags--;
+                setCellColor(x, y, Color.GREEN);
+                setCellValue(x, y, FLAG);
+            }
+        }
+    }
+
+    @Override
+    public void onMouseRightClick(int x, int y) {
+        markTile(x, y);
     }
 
     @Override
