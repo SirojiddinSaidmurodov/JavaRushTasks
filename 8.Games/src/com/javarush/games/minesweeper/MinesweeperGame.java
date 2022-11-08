@@ -8,11 +8,8 @@ import java.util.List;
 
 public class MinesweeperGame extends Game {
     private static final int SIDE = 9;
-    private static final String MINE = "\uD83D\uDCA3";
-    private static final String FLAG = "\uD83D\uDEA9";
     private final GameObject[][] gameField = new GameObject[SIDE][SIDE];
     private int countMinesOnField;
-    private int countFlags;
 
     @Override
     public void initialize() {
@@ -32,7 +29,6 @@ public class MinesweeperGame extends Game {
             }
         }
         countMineNeighbors();
-        countFlags = countMinesOnField;
     }
 
     private List<GameObject> getNeighbors(GameObject gameObject) {
@@ -57,67 +53,14 @@ public class MinesweeperGame extends Game {
     private void countMineNeighbors() {
         for (int y = 0; y < SIDE; y++) {
             for (int x = 0; x < SIDE; x++) {
-                GameObject gameObject = gameField[y][x];
-                if (!gameObject.isMine) {
-                    List<GameObject> neighbors = getNeighbors(gameObject);
-                    int mines = 0;
-                    for (GameObject neighbour :
-                            neighbors) {
-                        if (neighbour.isMine) {
-                            mines++;
-                        }
-                    }
-                    gameObject.countMineNeighbors = mines;
+                if (!gameField[y][x].isMine) {
+                    gameField[y][x].countMineNeighbors = (int)
+                            getNeighbors(gameField[y][x])
+                                    .stream()
+                                    .filter(gameObject -> gameObject.isMine)
+                                    .count();
                 }
             }
         }
-    }
-
-    private void openTile(int x, int y) {
-        GameObject gameObject = gameField[y][x];
-        gameObject.isOpen = true;
-        setCellColor(x, y, Color.ROYALBLUE);
-        if (gameObject.isMine) {
-            setCellValue(x, y, MINE);
-        } else {
-            int mines = gameObject.countMineNeighbors;
-            if (mines > 0) {
-                setCellNumber(x, y, mines);
-            } else {
-                setCellValue(x, y, "");
-                for (GameObject neighbor : getNeighbors(gameObject)) {
-                    if (!neighbor.isOpen) {
-                        openTile(neighbor.x, neighbor.y);
-                    }
-                }
-            }
-        }
-    }
-
-    private void markTile(int x, int y) {
-        GameObject gameObject = gameField[y][x];
-        if (!gameObject.isOpen) {
-            if (gameObject.isFlag) {
-                gameObject.isFlag = false;
-                countFlags++;
-                setCellValue(x, y, "");
-                setCellColor(x, y, Color.ORANGE);
-            } else if (countFlags != 0) {
-                gameObject.isFlag = true;
-                countFlags--;
-                setCellColor(x, y, Color.GREEN);
-                setCellValue(x, y, FLAG);
-            }
-        }
-    }
-
-    @Override
-    public void onMouseRightClick(int x, int y) {
-        markTile(x, y);
-    }
-
-    @Override
-    public void onMouseLeftClick(int x, int y) {
-        openTile(x, y);
     }
 }
