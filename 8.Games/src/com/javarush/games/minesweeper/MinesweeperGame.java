@@ -8,13 +8,27 @@ import java.util.List;
 
 public class MinesweeperGame extends Game {
     private static final int SIDE = 9;
+    private static final String MINE = "\uD83D\uDCA3";
+    private static final String FLAG = "\uD83D\uDEA9";
     private final GameObject[][] gameField = new GameObject[SIDE][SIDE];
     private int countMinesOnField;
+    private int countFlags;
+    private boolean isGameStopped;
 
     @Override
     public void initialize() {
         setScreenSize(SIDE, SIDE);
         createGame();
+    }
+
+    @Override
+    public void onMouseLeftClick(int x, int y) {
+        openTile(x, y);
+    }
+
+    @Override
+    public void onMouseRightClick(int x, int y) {
+        markTile(x, y);
     }
 
     private void createGame() {
@@ -28,6 +42,7 @@ public class MinesweeperGame extends Game {
                 setCellColor(x, y, Color.ORANGE);
             }
         }
+        countFlags = countMinesOnField;
         countMineNeighbors();
     }
 
@@ -60,6 +75,45 @@ public class MinesweeperGame extends Game {
                                     .filter(gameObject -> gameObject.isMine)
                                     .count();
                 }
+            }
+        }
+    }
+
+    private void openTile(int x, int y) {
+        GameObject tile = gameField[y][x];
+        tile.isOpen = true;
+        setCellColor(x, y, Color.GREEN);
+        if (tile.isMine) {
+            setCellValue(x, y, MINE);
+        } else {
+            int minesCount = tile.countMineNeighbors;
+            if (minesCount != 0) {
+                setCellNumber(x, y, minesCount);
+            } else {
+                setCellValue(x, y, "");
+                for (GameObject neighbor :
+                        getNeighbors(tile)) {
+                    if (!neighbor.isOpen) {
+                        openTile(neighbor.x, neighbor.y);
+                    }
+                }
+            }
+        }
+    }
+
+    private void markTile(int x, int y) {
+        GameObject tile = gameField[y][x];
+        if (!tile.isOpen) {
+            if (countFlags != 0 && !tile.isFlag) {
+                tile.isFlag = true;
+                countFlags--;
+                setCellValue(x, y, FLAG);
+                setCellColor(x, y, Color.YELLOW);
+            }else if (tile.isFlag){
+                tile.isFlag = false;
+                countFlags++;
+                setCellValue(x,y,"");
+                setCellColor(x,y,Color.ORANGE);
             }
         }
     }
