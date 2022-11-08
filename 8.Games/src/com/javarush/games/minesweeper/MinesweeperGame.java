@@ -13,7 +13,9 @@ public class MinesweeperGame extends Game {
     private final GameObject[][] gameField = new GameObject[SIDE][SIDE];
     private int countMinesOnField;
     private int countFlags;
+    private int countClosedTiles = SIDE * SIDE;
     private boolean isGameStopped;
+    private int score;
 
     @Override
     public void initialize() {
@@ -23,7 +25,11 @@ public class MinesweeperGame extends Game {
 
     @Override
     public void onMouseLeftClick(int x, int y) {
-        openTile(x, y);
+        if (isGameStopped) {
+            restart();
+        } else {
+            openTile(x, y);
+        }
     }
 
     @Override
@@ -40,6 +46,7 @@ public class MinesweeperGame extends Game {
                 }
                 gameField[y][x] = new GameObject(x, y, isMine);
                 setCellColor(x, y, Color.ORANGE);
+                setCellValue(x, y, "");
             }
         }
         countFlags = countMinesOnField;
@@ -69,11 +76,7 @@ public class MinesweeperGame extends Game {
         for (int y = 0; y < SIDE; y++) {
             for (int x = 0; x < SIDE; x++) {
                 if (!gameField[y][x].isMine) {
-                    gameField[y][x].countMineNeighbors = (int)
-                            getNeighbors(gameField[y][x])
-                                    .stream()
-                                    .filter(gameObject -> gameObject.isMine)
-                                    .count();
+                    gameField[y][x].countMineNeighbors = (int) getNeighbors(gameField[y][x]).stream().filter(gameObject -> gameObject.isMine).count();
                 }
             }
         }
@@ -81,27 +84,38 @@ public class MinesweeperGame extends Game {
 
     private void openTile(int x, int y) {
         GameObject tile = gameField[y][x];
-        tile.isOpen = true;
-        setCellColor(x, y, Color.GREEN);
+
+        if (tile.isOpen || tile.isFlag || isGameStopped) return;
+
         if (tile.isMine) {
-            setCellValue(x, y, MINE);
+            setCellValueEx(x, y, Color.RED, MINE);
+            gameOver();
         } else {
+            tile.isOpen = true;
+            countClosedTiles--;
+            setCellColor(x, y, Color.GREEN);
+
+            score += 5;
+            setScore(score);
+
             int minesCount = tile.countMineNeighbors;
             if (minesCount != 0) {
                 setCellNumber(x, y, minesCount);
             } else {
                 setCellValue(x, y, "");
-                for (GameObject neighbor :
-                        getNeighbors(tile)) {
+                for (GameObject neighbor : getNeighbors(tile)) {
                     if (!neighbor.isOpen) {
                         openTile(neighbor.x, neighbor.y);
                     }
                 }
             }
+            if (countClosedTiles == countMinesOnField) win();
         }
     }
 
     private void markTile(int x, int y) {
+        if (isGameStopped) return;
+
         GameObject tile = gameField[y][x];
         if (!tile.isOpen) {
             if (countFlags != 0 && !tile.isFlag) {
@@ -109,12 +123,32 @@ public class MinesweeperGame extends Game {
                 countFlags--;
                 setCellValue(x, y, FLAG);
                 setCellColor(x, y, Color.YELLOW);
-            }else if (tile.isFlag){
+            } else if (tile.isFlag) {
                 tile.isFlag = false;
                 countFlags++;
-                setCellValue(x,y,"");
-                setCellColor(x,y,Color.ORANGE);
+                setCellValue(x, y, "");
+                setCellColor(x, y, Color.ORANGE);
             }
         }
+    }
+
+    private void gameOver() {
+        isGameStopped = true;
+        showMessageDialog(Color.AQUAMARINE, "GAME OVER!", Color.ORANGERED, 80);
+    }
+
+    private void win() {
+        isGameStopped = true;
+        showMessageDialog(Color.WHEAT, "Congratulations!\nYou won!", Color.YELLOWGREEN, 80);
+    }
+
+    private void restart() {
+        isGameStopped = false;
+        countClosedTiles = SIDE * SIDE;
+        countMinesOnField = 0;
+        score = 0;
+        setScore(score);
+        isGameStopped = false;
+        createGame();
     }
 }
