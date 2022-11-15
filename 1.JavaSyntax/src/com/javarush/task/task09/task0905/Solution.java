@@ -10,7 +10,9 @@ public class Solution {
     }
 
     public static int getStackTraceDepth() {
-        //напишите тут ваш код
+        int length = Thread.currentThread().getStackTrace().length;
+        System.out.println(length);
+        return length;
     }
 }
 
