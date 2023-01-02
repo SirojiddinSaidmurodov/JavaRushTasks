@@ -68,6 +68,7 @@ public class Tetris {
             }
 
             step();             //делаем очередной шаг
+            field.clean();
             field.print();      //печатаем состояние "поля"
             Thread.sleep(300);  //пауза 300 миллисекунд - 1/3 секунды
         }

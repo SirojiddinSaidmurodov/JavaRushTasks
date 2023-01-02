@@ -50,6 +50,13 @@ public class Field {
             matrix[y][x] = value;
     }
 
+    public void clean() {
+        for (int i = 0; i < (height + 2)*20; i++) {
+            System.out.println("\b");
+        }
+
+    }
+
     /**
      * Метод печатает на экран текущее содержание матрицы
      */
