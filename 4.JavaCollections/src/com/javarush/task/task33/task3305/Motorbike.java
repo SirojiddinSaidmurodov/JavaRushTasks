@@ -21,9 +21,6 @@ public class Motorbike extends Vehicle {
 
     @Override
     public String toString() {
-        return "Motorbike{" +
-                "name='" + name + '\'' +
-                ", owner='" + owner + '\'' +
-                '}';
+        return "Motorbike{" + "name='" + name + '\'' + ", owner='" + owner + '\'' + '}';
     }
 }
